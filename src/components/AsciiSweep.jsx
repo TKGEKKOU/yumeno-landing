@@ -8,14 +8,13 @@ export function AsciiSweep({ children, style, enabled = true, ...props }) {
   const animationRef = useRef(null);
 
   useEffect(() => {
-    // 检测 HTML-in-Canvas API 支持
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const supported = typeof ctx?.drawElement === 'function';
     setIsSupported(supported && enabled);
     
     if (!supported && enabled) {
-      console.info('ASCII Sweep: HTML-in-Canvas API 不支持，使用纯 CSS 降级方案');
+      console.info('ASCII Sweep: HTML-in-Canvas API not supported, using CSS fallback');
     }
   }, [enabled]);
 
@@ -26,7 +25,6 @@ export function AsciiSweep({ children, style, enabled = true, ...props }) {
     const container = containerRef.current;
     const ctx = canvas.getContext('2d');
     
-    // 设置 Canvas 尺寸匹配容器
     const resizeCanvas = () => {
       const rect = container.getBoundingClientRect();
       canvas.width = rect.width;
@@ -36,7 +34,6 @@ export function AsciiSweep({ children, style, enabled = true, ...props }) {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    // ASCII 字符集
     const asciiChars = '░▒▓█▄▀■□▪▫';
     let sweepPosition = -100;
     
@@ -45,7 +42,6 @@ export function AsciiSweep({ children, style, enabled = true, ...props }) {
       
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // 绘制 ASCII 扫描带
       const bandWidth = 120;
       const x = sweepPosition;
       
@@ -58,7 +54,6 @@ export function AsciiSweep({ children, style, enabled = true, ...props }) {
         ctx.fillStyle = '#0066CC';
         ctx.font = '16px monospace';
         
-        // 随机分布字符
         for (let y = 0; y < canvas.height; y += 20) {
           const offset = Math.random() * 10;
           ctx.fillText(char, x + i + offset, y + offset);
@@ -67,7 +62,6 @@ export function AsciiSweep({ children, style, enabled = true, ...props }) {
         ctx.restore();
       }
       
-      // 循环扫描
       sweepPosition += 3;
       if (sweepPosition > canvas.width) {
         sweepPosition = -bandWidth;
@@ -86,10 +80,12 @@ export function AsciiSweep({ children, style, enabled = true, ...props }) {
     };
   }, [isSupported]);
 
+  const containerClass = 'ascii-sweep-container' + (!isSupported && enabled ? ' ascii-sweep-fallback' : '');
+
   return (
     <div 
       ref={containerRef}
-      className={scii-sweep-container }
+      className={containerClass}
       style={style}
       {...props}
     >
