@@ -32,7 +32,7 @@ npm run dev
 npm run build
 ```
 
-产物位于 `dist/`，可直接部署到 Vercel、Netlify、Cloudflare Pages、GitHub Pages 或任意静态服务器。
+构建产物位于 `dist/`。将 `dist/` 目录中的文件上传到你的 Web 服务器站点根目录，并将域名指向对应站点即可。建议配置 HTTPS、静态文件缓存；如果使用 Nginx，请确保 SPA 路由回退到 `index.html`。
 
 ## 发布前检查
 
@@ -47,7 +47,13 @@ npm run preview
 
 本仓库只包含公开展示内容，不包含主项目 `data/`、日志、模型文件、数据库、API Key 或私有服务器信息。示例地址仅使用 `127.0.0.1`，外部链接只指向公开 GitHub 位置。
 
-## 相关链接`r`n`r`n- 主项目：[TKGEKKOU/yumeno](https://github.com/TKGEKKOU/yumeno)`r`n- 版本下载：[Releases](https://github.com/TKGEKKOU/yumeno/releases)`r`n- 展示页仓库：[TKGEKKOU/yumeno-landing](https://github.com/TKGEKKOU/yumeno-landing)`r`n`r`nGitHub Pages 由 `.github/workflows/deploy.yml` 自动构建并发布 `dist/`。首次发布前，请在仓库 `Settings -> Pages -> Build and deployment -> Source` 中选择 `GitHub Actions`。`r`n`r`n## 安全说明
+## 相关链接
+
+- 主项目：[TKGEKKOU/yumeno](https://github.com/TKGEKKOU/yumeno)
+- 版本下载：[Releases](https://github.com/TKGEKKOU/yumeno/releases)
+- 展示页仓库：[TKGEKKOU/yumeno-landing](https://github.com/TKGEKKOU/yumeno-landing)
+
+## 安全说明
 
 - 变更类操作必须经过人工确认。
 - 模型、知识库与工具按角色和工作区隔离。
