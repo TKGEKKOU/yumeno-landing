@@ -1,0 +1,19 @@
+.peel-reveal {
+  position: relative;
+  min-height: 420px;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--ink);
+  cursor: e-resize;
+  outline: none;
+}
+.peel-reveal__under, .peel-reveal__sheet { position: absolute; inset: 0; }
+.peel-reveal__under { z-index: 0; display: grid; place-items: center; padding: 32px; color: var(--paper); background: linear-gradient(135deg, rgba(255,255,255,.08) 25%, transparent 25%) 0 0 / 18px 18px, var(--ink); }
+.peel-reveal__sheet { z-index: 1; padding: clamp(28px, 5vw, 54px); background: var(--paper); transition: clip-path .32s cubic-bezier(.2,.75,.2,1), transform .32s ease, box-shadow .32s ease; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); transform-origin: top right; }
+.peel-reveal:hover .peel-reveal__sheet, .peel-reveal:focus-visible .peel-reveal__sheet { transform: perspective(900px) rotateY(-2deg) translateX(-1%); box-shadow: 20px 18px 45px rgba(0,0,0,.24); }
+.peel-reveal:focus-visible .peel-reveal__sheet { clip-path: polygon(0 0, 62% 0, 38% 100%, 0 100%); }
+.peel-reveal::after { content: ''; position: absolute; z-index: 2; top: 0; right: 0; width: 2px; height: 100%; background: var(--red); transform: scaleY(0); transform-origin: bottom; transition: transform .3s ease; }
+.peel-reveal:hover::after, .peel-reveal:focus-visible::after { transform: scaleY(1); }
+.peel-reveal__hint { position: absolute; z-index: 3; right: 20px; bottom: 18px; color: rgba(255,255,255,.7); font-size: 11px; letter-spacing: .08em; writing-mode: vertical-rl; opacity: 0; transition: opacity .3s ease; }
+.peel-reveal:hover .peel-reveal__hint, .peel-reveal:focus-visible .peel-reveal__hint { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .peel-reveal__sheet { transition: clip-path .01ms linear; } .peel-reveal:hover .peel-reveal__sheet, .peel-reveal:focus-visible .peel-reveal__sheet { transform: none; } }

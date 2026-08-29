@@ -1,273 +1,108 @@
 import React from 'react';
 import AsciiSweep from './components/AsciiSweep';
+import PeelReveal from './components/PeelReveal';
+import Waveform from './components/Waveform';
 import './App.css';
+
+const repo = 'https://github.com/TKGEKKOU/yumeno';
+const releases = `${repo}/releases`;
+
+const experiences = [
+  { number: '01', title: '角色', text: '把设定、语气和习惯放进一个可以长期相处的角色里。' },
+  { number: '02', title: '声音', text: '从自己的音视频素材开始，做出可以试听、保存和绑定的声音。' },
+  { number: '03', title: '记忆', text: '重要的对话与偏好留在本地，下一次相遇不必从零开始。' },
+  { number: '04', title: '知识', text: '给角色一套独立的资料空间，让回答有依据，也知道什么时候应该说不知道。' },
+  { number: '05', title: '行动', text: '复杂任务交给合适的能力处理，敏感操作先停下来等你确认。' },
+];
+
+const deploymentModes = [
+  { title: '轻量云端', tag: '快速开始', text: '使用 OpenAI-compatible 服务完成对话与检索，适合快速体验。' },
+  { title: '本地混合', tag: '推荐', text: '对话接入云端，语音与资料保留在本地，兼顾体验和控制力。' },
+  { title: '完全离线', tag: '最大掌控', text: '使用 Ollama、本地 Embedding 与 GPT-SoVITS，适合不希望数据离开设备的场景。' },
+];
 
 function App() {
   return (
     <div className="app">
-      <header>
-        <div className="header-content">
-          <div className="logo">YUMENO</div>
-          <nav>
-            <a href="#capabilities">能力</a>
-            <a href="#deployment">部署</a>
-            <a href="#architecture">架构</a>
-            <a href="#quickstart">快速开始</a>
-            <a href="#comparison">对比</a>
-          </nav>
-        </div>
+      <header className="site-header">
+        <a className="brand" href="#top" aria-label="YUMENO 首页"><span className="brand-mark">Y</span> YUMENO</a>
+        <nav className="site-nav" aria-label="页面导航">
+          <a href="#experience">体验</a>
+          <a href="#voice">声音工坊</a>
+          <a href="#runtime">它如何工作</a>
+          <a href="#start">开始使用</a>
+        </nav>
+        <a className="header-link" href={releases}>下载 <span aria-hidden="true">↗</span></a>
       </header>
 
-      <AsciiSweep style={{ width: '100%' }}>
-        <section className="hero">
-          <div className="container">
-            <div className="hero-grid">
-              <div className="hero-left">
-                <h1>工程化<br />Multi-Agent RAG 平台</h1>
-                <p className="tagline">
-                  以 LangGraph 为核心的对话式工作流平台：确定性意图路由、自适应 RAG、受控工具、本地语音、会话检查点与前端过程可观测。
-                </p>
+      <main id="top">
+        <AsciiSweep style={{ width: '100%' }}>
+          <section className="hero section-shell" aria-labelledby="hero-title">
+            <div className="hero-copy">
+              <div className="section-kicker">PERSONA WORKSPACE / 001</div>
+              <h1 id="hero-title">让角色拥有<br /><em>声音、记忆</em>与行动力。</h1>
+              <p className="hero-lead">YUMENO 是一个放在自己设备上的角色工作台。创建一个角色，给它声音、知识和记忆，然后从一次真实的对话开始。</p>
               <div className="hero-actions">
-                <a href="https://github.com/TKGEKKOU/yumeno/releases" className="cta">立即下载</a>
-                <a href="#quickstart" className="secondary-cta">查看快速开始</a>
+                <a className="button button-primary" href={releases}>下载 YUMENO <span aria-hidden="true">↗</span></a>
+                <a className="button button-quiet" href="#experience">看看它能做什么 <span aria-hidden="true">↓</span></a>
               </div>
-              </div>
-
-              <div className="metrics-grid">
-                <div className="metric-card">
-                  <div className="metric-value">6</div>
-                  <div className="metric-label">专业 Worker 智能体协同编排</div>
-                </div>
-                <div className="metric-card">
-                  <div className="metric-value">+31%</div>
-                  <div className="metric-label">RAG 准确率提升（内部评测）</div>
-                </div>
-                <div className="metric-card">
-                  <div className="metric-value">10</div>
-                  <div className="metric-label">层 SQL 安全防护机制</div>
-                </div>
-                <div className="metric-card">
-                  <div className="metric-value">584</div>
-                  <div className="metric-label">单元测试当前通过</div>
-                </div>
-              </div>
+              <div className="hero-note"><span className="status-dot" />本地优先 · 不需要注册 · Windows</div>
             </div>
+
+            <PeelReveal className="hero-peel" reveal={(
+              <div className="reveal-map">
+                <div className="reveal-label">THE SPACE BETWEEN</div>
+                <div className="reveal-title">你和<br />角色之间。</div>
+                <div className="reveal-lines">
+                  <span><b>01</b> 角色设定</span><span><b>02</b> 本地记忆</span><span><b>03</b> 专属知识</span><span><b>04</b> 可以行动</span>
+                </div>
+                <div className="reveal-stamp">OPEN<br />YOUR<br />WORLD</div>
+              </div>
+            )}>
+              <div className="hero-sheet">
+                <div className="sheet-top"><span>YUMENO / ROLE FILE</span><span>NO. 001</span></div>
+                <div className="sheet-orbit" aria-hidden="true"><span /><span /><span /></div>
+                <div className="sheet-copy">
+                  <div className="sheet-symbol">◒</div>
+                  <div className="sheet-label">A PLACE FOR YOUR PERSONA</div>
+                  <h2>把想象<br />留在身边。</h2>
+                  <p>不是一个回答问题的工具，而是一个可以被你慢慢定义的角色空间。</p>
+                </div>
+                <div className="sheet-footer"><span>MOVE TO REVEAL</span><span className="sheet-arrow">→</span></div>
+              </div>
+            </PeelReveal>
+          </section>
+        </AsciiSweep>
+
+        <section id="experience" className="experience-section section-shell">
+          <div className="section-intro"><div className="section-kicker">THE EXPERIENCE / 02</div><h2>从一个角色开始，<br /><span>慢慢长出一整个世界。</span></h2><p>它可以只是陪你聊天，也可以帮你整理资料、记住重要的事，或者用你熟悉的声音回应。</p></div>
+          <div className="experience-grid">
+            {experiences.map((item) => <article className="experience-card" key={item.number}><span className="card-number">{item.number}</span><h3>{item.title}</h3><p>{item.text}</p><span className="card-line" /></article>)}
           </div>
         </section>
-      </AsciiSweep>
 
-      <section id="deployment" className="deployment-section">
-        <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">三种部署模式</h2>
-            <p className="section-subtitle">根据合规要求、性能需求和基础设施灵活选择</p>
+        <section id="voice" className="voice-section section-shell">
+          <div className="voice-visual"><div className="voice-orbit" aria-hidden="true"><span /><span /></div><div className="voice-caption"><span>VOICE STUDIO</span><span>LISTEN / CREATE / BIND</span></div><Waveform /></div>
+          <div className="voice-copy"><div className="section-kicker">VOICE STUDIO / 03</div><h2>先听见它，<br /><em>再认识它。</em></h2><p>把一段视频或音频变成角色可以使用的声音。每一步都看得见：提取人声、分离、切片、试听、保存，再绑定到角色。</p><div className="voice-steps"><span><b>01</b>素材</span><span><b>02</b>处理</span><span><b>03</b>试听</span><span><b>04</b>绑定</span></div><a className="text-link" href={repo}>查看项目源码 <span aria-hidden="true">↗</span></a></div>
+        </section>
+
+        <section id="runtime" className="runtime-section section-shell">
+          <div className="section-intro"><div className="section-kicker">UNDER THE SURFACE / 04</div><h2>它为什么能记得，<br /><span>也为什么值得信任。</span></h2><p>复杂的部分藏在表面之下：每个角色拥有自己的资料空间，任务由合适的能力完成，重要动作会交还给你决定。</p></div>
+          <div className="runtime-board">
+            <div className="runtime-top"><span>YUMENO / RUNTIME MAP</span><span>LOCAL WORKSPACE</span></div>
+            <div className="runtime-flow"><div className="flow-node flow-user"><small>YOU</small><strong>一句话</strong><span>你的请求</span></div><div className="flow-connector"><i /><i /><i /></div><div className="flow-node flow-supervisor"><small>PERSONA SUPERVISOR</small><strong>角色中枢</strong><span>理解 · 分派 · 表达</span></div><div className="flow-connector"><i /><i /><i /></div><div className="flow-workers"><div><b>知识</b><span>查资料</span></div><div><b>记忆</b><span>记住重要的事</span></div><div><b>声音</b><span>回应你</span></div><div><b>行动</b><span>完成任务</span></div></div></div>
+            <div className="runtime-bottom"><span><i className="tiny-dot red" />敏感操作需要确认</span><span><i className="tiny-dot" />每次过程可以恢复</span><span><i className="tiny-dot" />资料按角色隔离</span></div>
           </div>
+          <div className="proof-grid"><div><strong>85%</strong><span>自适应 RAG 准确率</span></div><div><strong>14%</strong><span>评测集幻觉率</span></div><div><strong>85%</strong><span>Recall@3</span></div><div><strong>107</strong><span>核心单元测试通过</span></div></div>
+          <p className="data-note">以上为项目当前资料中的内部评测数据，不代表第三方认证。</p>
+        </section>
 
-          <div className="deploy-cards">
-            <div className="deploy-card">
-              <h3>云端模式</h3>
-              <div className="deploy-size">~50 MB</div>
-              <ul className="deploy-features">
-                <li><strong>LLM:</strong> OpenAI API</li>
-                <li><strong>向量:</strong> text-embedding-3</li>
-                <li><strong>语音:</strong> 不支持</li>
-                <li><strong>场景:</strong> 快速验证</li>
-              </ul>
-            </div>
+        <section className="deployment-section section-shell"><div className="section-intro compact"><div className="section-kicker">YOUR WAY / 05</div><h2>放在哪里，<br /><span>由你决定。</span></h2><p>从快速体验到完全离线，YUMENO 适应你的设备、网络和隐私边界。</p></div><div className="deployment-grid">{deploymentModes.map((mode, index) => <article className={`deployment-card ${index === 1 ? 'is-featured' : ''}`} key={mode.title}><div className="deployment-number">0{index + 1}</div><span className="deployment-tag">{mode.tag}</span><h3>{mode.title}</h3><p>{mode.text}</p><span className="card-line" /></article>)}</div></section>
 
-            <div className="deploy-card featured">
-              <div className="deploy-badge">推荐</div>
-              <h3>标准模式</h3>
-              <div className="deploy-size">~500 MB</div>
-              <ul className="deploy-features">
-                <li><strong>LLM:</strong> OpenAI API</li>
-                <li><strong>向量:</strong> bge-reranker-v2-m3</li>
-                <li><strong>语音:</strong> GPT-SoVITS 本地</li>
-                <li><strong>场景:</strong> 混合部署</li>
-              </ul>
-            </div>
+        <section id="start" className="start-section section-shell"><div className="start-panel"><div><div className="section-kicker">READY WHEN YOU ARE / 06</div><h2>从一次对话<br />开始。</h2><p>下载发行包，配置你的模型服务，然后打开属于你的角色空间。</p></div><div className="start-actions"><a className="button button-light" href={releases}>前往 Releases <span aria-hidden="true">↗</span></a><a className="button button-outline-light" href={`${repo}#readme`}>阅读文档 <span aria-hidden="true">↗</span></a></div><div className="start-meta"><span>主项目公开仓库</span><span>本地数据 · 可控部署 · 持续更新</span></div></div></section>
+      </main>
 
-            <div className="deploy-card">
-              <h3>离线模式</h3>
-              <div className="deploy-size">~3 GB</div>
-              <ul className="deploy-features">
-                <li><strong>LLM:</strong> Ollama (qwen2.5:7b)</li>
-                <li><strong>向量:</strong> bge-m3 本地</li>
-                <li><strong>语音:</strong> GPT-SoVITS 本地</li>
-                <li><strong>场景:</strong> 完全离线</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="capabilities" className="capability-section">
-        <div className="container-wide">
-          <div className="section-header">
-            <h2 className="section-title">能力矩阵</h2>
-            <p className="section-subtitle">从请求理解到执行、确认、恢复与展示的完整链路</p>
-          </div>
-          <div className="capability-grid">
-            <article className="capability-card">
-              <h3>确定性意图路由</h3>
-              <p>音色克隆、记忆、文档、档案与配置等强意图直达 Worker，模糊请求才进入 Supervisor，减少多余模型调用。</p>
-            </article>
-            <article className="capability-card">
-              <h3>自适应标准 RAG</h3>
-              <p>混合检索、查询改写、证据引用、质量门与有界纠错；结构化数据进入只读 SQL 沙箱，限制函数、表范围与结果集。</p>
-            </article>
-            <article className="capability-card">
-              <h3>Codex 式过程流</h3>
-              <p>阶段节点、当前步骤、失败原因与最终回复分层展示；正文到达后过程自动折叠，思考内容不会混入语音输出。</p>
-            </article>
-            <article className="capability-card">
-              <h3>安全工具执行</h3>
-              <p>变更操作使用 HITL 确认，LangGraph checkpoint 保存上下文，服务重启或中断后可恢复；能力按角色与作用域授权。</p>
-            </article>
-            <article className="capability-card">
-              <h3>本地语音工作流</h3>
-              <p>聊天内上传素材，复用声音工作坊会话；质量检测、训练、试听与绑定在后台推进，节点状态回传对话页。</p>
-            </article>
-            <article className="capability-card">
-              <h3>Web-first 控制台</h3>
-              <p>原生 JS 与 Vue 混合前端覆盖角色、知识、Provider、能力扩展、评测与设置；hash 路由保留状态并支持切页不断线。</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section id="architecture" className="architecture-section">
-        <div className="container-wide">
-          <div className="section-header">
-            <h2 className="section-title">核心技术架构</h2>
-            <p className="section-subtitle">基于 LangGraph 1.2.9 的多智能体编排系统</p>
-          </div>
-
-          <div className="bento-grid">
-            <div className="bento-item bento-large">
-              <div>
-                <h3>自适应 RAG 引擎</h3>
-                <p>混合检索（向量 + BM25）+ 查询改写 + 答案质量门 + 自动纠错流程，在内部评测集上准确率提升 31%，幻觉率降低 39%。</p>
-              </div>
-              <span className="bento-metric">+31% 准确率</span>
-            </div>
-
-            <div className="bento-item bento-tall">
-              <div>
-                <h3>多智能体编排</h3>
-              <p>1 个对外 Supervisor、1 个 knowledge 规划子图、6 个受限 Worker；Worker 结果统一经过 finalize 合同回 Supervisor。</p>
-              </div>
-              <span className="bento-metric">6 Workers</span>
-            </div>
-
-            <div className="bento-item bento-normal">
-              <div>
-                <h3>本地语音克隆</h3>
-                <p>GPT-SoVITS 5 步自动化工作流，质量门自动拒绝不合格素材。</p>
-              </div>
-              <span className="bento-metric">5 步流程</span>
-            </div>
-
-            <div className="bento-item bento-wide">
-              <div>
-                <h3>SQL 安全防护</h3>
-                <p>递归 CTE、JOIN 深度、子查询深度、表白名单、危险函数、结果集限制、超时保护等由单元测试覆盖。</p>
-              </div>
-              <span className="bento-metric">10 层防护</span>
-            </div>
-
-            <div className="bento-item bento-normal">
-              <div>
-                <h3>运行时配置</h3>
-                <p>Web 界面动态修改参数，HITL 确认防误操作。</p>
-              </div>
-              <span className="bento-metric">HITL</span>
-            </div>
-
-            <div className="bento-item bento-normal">
-              <div>
-                <h3>向量存储</h3>
-                <p>Milvus 3.0，支持混合检索、重排序、元数据过滤。</p>
-              </div>
-              <span className="bento-metric">Milvus 3.0</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="quickstart" className="quickstart-section">
-        <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">快速开始</h2>
-            <p className="section-subtitle">三步完成本地验证</p>
-          </div>
-          <div className="quickstart-steps">
-            <article className="step-card">
-              <span>1</span>
-              <h3>下载发行包</h3>
-              <p>从 GitHub Releases 获取 Windows 包，解压后不要修改 <code>data/</code> 目录。</p>
-            </article>
-            <article className="step-card">
-              <span>2</span>
-              <h3>配置模型服务</h3>
-              <p>在 Provider 页填写 OpenAI-compatible 地址与密钥，Embedding 与本地语音可按需安装。</p>
-            </article>
-            <article className="step-card">
-              <span>3</span>
-              <h3>启动并对话</h3>
-              <p>运行 <code>main.py</code> 后访问 <code>http://127.0.0.1:17000/static/index.html</code>，进入对话或先导入知识文档。</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section id="comparison" className="comparison-section">
-        <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">专业定位</h2>
-            <p className="section-subtitle">为知识密集型、高合规要求场景设计，而非通用聊天</p>
-          </div>
-
-          <div className="comparison-wrapper">
-            <div className="comparison-col">
-              <h3>通用 IM 机器人</h3>
-              <ul className="comparison-list">
-                <li className="cross">单 Agent 架构</li>
-                <li className="cross">简单向量检索</li>
-                <li className="cross">不支持语音克隆</li>
-                <li className="cross">依赖云端 API</li>
-                <li className="cross">无结构化查询防护</li>
-                <li className="cross">适用于日常聊天娱乐</li>
-              </ul>
-            </div>
-
-            <div className="comparison-col">
-              <h3>YUMENO</h3>
-              <ul className="comparison-list">
-                <li className="check">Supervisor + 6 Worker</li>
-                <li className="check">自适应纠错 + 评测数据集</li>
-                <li className="check">本地 GPT-SoVITS 工作流</li>
-                <li className="check">完全本地化（Ollama）</li>
-                <li className="check">只读 SQL 沙箱 + 584 项测试</li>
-                <li className="check">企业知识库、合规问答</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer>
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-links">
-              <a href="https://github.com/TKGEKKOU/yumeno/releases">下载</a>
-              <a href="https://github.com/TKGEKKOU/yumeno/blob/main/README.md">文档</a>
-              <a href="https://github.com/TKGEKKOU/yumeno/issues">反馈</a>
-            </div>
-            <p className="copyright">© 2026 YUMENO Project</p>
-          </div>
-        </div>
-      </footer>
+      <footer className="site-footer"><a className="brand" href="#top"><span className="brand-mark">Y</span> YUMENO</a><div className="footer-links"><a href={repo}>GitHub</a><a href={releases}>Releases</a><a href={`${repo}/issues`}>反馈</a></div><p>© 2026 YUMENO Project</p></footer>
     </div>
   );
 }

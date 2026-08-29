@@ -1,0 +1,28 @@
+.waveform {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 92px;
+}
+
+.waveform i {
+  display: block;
+  flex: 1;
+  min-width: 2px;
+  height: var(--wave-height);
+  border-radius: 999px;
+  background: currentColor;
+  transform-origin: center;
+  animation: voice-pulse 2.4s ease-in-out infinite alternate;
+  animation-delay: calc(var(--wave-index) * -0.06s);
+}
+
+@keyframes voice-pulse {
+  from { transform: scaleY(.72); opacity: .55; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waveform i { animation: none; }
+}
+

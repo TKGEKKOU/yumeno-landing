@@ -30,8 +30,8 @@
 - `PeelReveal({ children, reveal, className })` renders a focusable/hoverable layered wrapper and exposes `reveal` beneath the surface.
 - `Waveform({ bars = 36, className })` renders decorative bars with `aria-hidden="true"`.
 
-- [ ] Build components with CSS fallback, keyboard focus, and reduced-motion rules.
-- [ ] Run `npm run build` and confirm the components compile.
+- [x] Build components with CSS fallback, keyboard focus, and reduced-motion rules.
+- [x] Run `npm run build` and confirm the components compile.
 
 ### Task 2: Replace page information architecture and copy
 
@@ -43,9 +43,9 @@
 - Import `PeelReveal` and `Waveform`.
 - Keep all outbound links pointing to `TKGEKKOU/yumeno` and its Releases/docs/issues.
 
-- [ ] Implement sections: Hero, Experience, Voice Studio, Runtime, Trust, Deployment, Quick Start, Footer.
-- [ ] Replace stale “6 Worker/584 tests” claims with the documented 1 + 1 + 5 architecture and 107-test metric.
-- [ ] Use semantic buttons/links and descriptive labels.
+- [x] Implement sections: Hero, Experience, Voice Studio, Runtime, Trust, Deployment, Quick Start, Footer.
+- [x] Replace stale “6 Worker/584 tests” claims with the documented 1 + 1 + 5 architecture and 107-test metric.
+- [x] Use semantic buttons/links and descriptive labels.
 
 ### Task 3: Implement visual system and responsive layout
 
@@ -54,17 +54,18 @@
 - Modify: `src/index.css`
 - Modify: `.gitignore`
 
-- [ ] Style paper/ink/red visual language, grid marks, cards, workflow nodes, metrics, and footer.
-- [ ] Add responsive breakpoints for 1024px and 720px.
-- [ ] Add reduced-motion overrides and visible focus styles.
-- [ ] Ignore `.superpowers/` preview artifacts.
+- [x] Style paper/ink/red visual language, grid marks, cards, workflow nodes, metrics, and footer.
+- [x] Add responsive breakpoints for 1024px and 720px.
+- [x] Add reduced-motion overrides and visible focus styles.
+- [x] Ignore `.superpowers/` preview artifacts.
 
 ### Task 4: Verify production output
 
 **Files:**
 - No source changes unless verification finds a defect.
 
-- [ ] Run `npm run build`.
-- [ ] Run the local server on `127.0.0.1:17000` and request `/` with HTTP 200.
-- [ ] Inspect the rendered page and verify no horizontal overflow at desktop/mobile widths.
-- [ ] Commit all changes with `feat: redesign YUMENO landing page`.
+- [x] Run `npm run build`.
+- [x] Run the local server on `127.0.0.1:17000` and request `/` with HTTP 200.
+- [x] Inspect the rendered page and verify no horizontal overflow at desktop/mobile widths.
+- [x] Commit all changes with `feat: redesign YUMENO landing page`.
+
