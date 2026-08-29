@@ -1,28 +1,14 @@
-.waveform {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 92px;
-}
+.waveform { position: absolute; right: 34px; bottom: 34px; left: 34px; display: grid; gap: 12px; }
+.waveform-bars { display: flex; align-items: center; justify-content: space-between; height: 68px; gap: 3px; }
+.waveform-bars i { flex: 1; min-width: 2px; height: var(--wave-height); border-radius: 999px; background: linear-gradient(180deg, var(--accent), var(--primary)); opacity: .52; transform-origin: center; transition: height .24s ease, opacity .2s ease, background .2s ease; }
+.waveform.is-playing .waveform-bars i { opacity: 1; animation: wave-breathe .56s ease-in-out var(--wave-delay) infinite alternate; }
+.waveform-track { height: 3px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.14); }
+.waveform-track span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width .12s linear; }
+.waveform-button { display: inline-flex; align-items: center; justify-self: start; gap: 9px; min-height: 42px; padding: 0 15px 0 11px; border: 1px solid rgba(255,255,255,.2); border-radius: 12px; color: #fff; background: rgba(255,255,255,.1); font: inherit; font-size: 11px; font-weight: 700; cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
+.waveform-button:hover { border-color: rgba(109,229,208,.7); background: rgba(109,229,208,.14); transform: translateY(-1px); }
+.waveform-button-icon { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 7px; color: var(--primary-deep); background: var(--accent); font-size: 9px; }
+@keyframes wave-breathe { from { transform: scaleY(.55); } to { transform: scaleY(1.05); } }
+@media (max-width: 680px) { .waveform { right: 22px; bottom: 24px; left: 22px; } }
+@media (prefers-reduced-motion: reduce) { .waveform.is-playing .waveform-bars i { animation: none; } .waveform-bars i, .waveform-track span, .waveform-button { transition-duration: .01ms; } }
 
-.waveform i {
-  display: block;
-  flex: 1;
-  min-width: 2px;
-  height: var(--wave-height);
-  border-radius: 999px;
-  background: currentColor;
-  transform-origin: center;
-  animation: voice-pulse 2.4s ease-in-out infinite alternate;
-  animation-delay: calc(var(--wave-index) * -0.06s);
-}
-
-@keyframes voice-pulse {
-  from { transform: scaleY(.72); opacity: .55; }
-  to { transform: scaleY(1); opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .waveform i { animation: none; }
-}
-
+\n

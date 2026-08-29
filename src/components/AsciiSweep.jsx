@@ -1,105 +1,104 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './AsciiSweep.css';
 
-export function AsciiSweep({ children, style, enabled = true, ...props }) {
-  const containerRef = useRef(null);
+function AsciiSweep({ panels = [], index = 0, children, color = '#5657D9', duration = 0.75, className = '', onSweepStart, onSweepEnd }) {
+  const [displayIndex, setDisplayIndex] = useState(index);
+  const displayIndexRef = useRef(index);
+  const [isAnimating, setIsAnimating] = useState(false);
   const canvasRef = useRef(null);
-  const [isSupported, setIsSupported] = useState(false);
+  const rootRef = useRef(null);
   const animationRef = useRef(null);
+  const timerRef = useRef(null);
+  const reducedMotionRef = useRef(false);
 
   useEffect(() => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const supported = typeof ctx?.drawElement === 'function';
-    setIsSupported(supported && enabled);
-    
-    if (!supported && enabled) {
-      console.info('ASCII Sweep: HTML-in-Canvas API not supported, using CSS fallback');
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => { reducedMotionRef.current = media.matches; };
+    update();
+    media.addEventListener?.('change', update);
+    return () => media.removeEventListener?.('change', update);
+  }, []);
+
+  useEffect(() => {
+    if (index === displayIndexRef.current) return undefined;
+    displayIndexRef.current = index;
+    setDisplayIndex(index);
+    onSweepStart?.(index);
+    if (reducedMotionRef.current) {
+      setIsAnimating(false);
+      onSweepEnd?.(index);
+      return undefined;
     }
-  }, [enabled]);
+    setIsAnimating(true);
+    timerRef.current = window.setTimeout(() => {
+      setIsAnimating(false);
+      onSweepEnd?.(index);
+    }, duration * 1000);
+    return () => window.clearTimeout(timerRef.current);
+  }, [index, duration, onSweepEnd, onSweepStart]);
 
   useEffect(() => {
-    if (!isSupported || !canvasRef.current || !containerRef.current) return;
-
+    if (!isAnimating || !canvasRef.current || !rootRef.current || reducedMotionRef.current) return undefined;
     const canvas = canvasRef.current;
-    const container = containerRef.current;
+    const root = rootRef.current;
     const ctx = canvas.getContext('2d');
-    
-    const resizeCanvas = () => {
-      const rect = container.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+    if (!ctx) return undefined;
+    const startedAt = performance.now();
+    const chars = '·:+*#@';
+    const resize = () => {
+      const rect = root.getBoundingClientRect();
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.floor(rect.width * ratio));
+      canvas.height = Math.max(1, Math.floor(rect.height * ratio));
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     };
-    
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    resize();
+    window.addEventListener('resize', resize);
 
-    const asciiChars = '░▒▓█▄▀■□▪▫';
-    let sweepPosition = -100;
-    
-    const animate = () => {
-      if (!ctx || !canvas.width) return;
-      
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      const bandWidth = 120;
-      const x = sweepPosition;
-      
-      for (let i = 0; i < bandWidth; i++) {
-        const alpha = Math.sin((i / bandWidth) * Math.PI) * 0.6;
-        const char = asciiChars[Math.floor(Math.random() * asciiChars.length)];
-        
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = '#0066CC';
-        ctx.font = '16px monospace';
-        
-        for (let y = 0; y < canvas.height; y += 20) {
-          const offset = Math.random() * 10;
-          ctx.fillText(char, x + i + offset, y + offset);
+    const draw = (time) => {
+      const rect = root.getBoundingClientRect();
+      const progress = Math.min(1, (time - startedAt) / (duration * 1000));
+      const x = -rect.width * 0.18 + progress * rect.width * 1.36;
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.font = '11px ui-monospace, SFMono-Regular, Menlo, monospace';
+      for (let column = -80; column < 100; column += 16) {
+        const distance = Math.abs(column * 1.3 - x);
+        const alpha = Math.max(0, 1 - distance / 150) * 0.72;
+        if (alpha <= 0) continue;
+        for (let y = 12; y < rect.height; y += 15) {
+          const char = chars[(column + Math.floor(y / 15) + Math.floor(time / 120)) % chars.length];
+          ctx.globalAlpha = alpha * (0.65 + ((y / 15) % 3) * 0.12);
+          ctx.fillStyle = color;
+          ctx.fillText(char, column + x, y);
         }
-        
-        ctx.restore();
       }
-      
-      sweepPosition += 3;
-      if (sweepPosition > canvas.width) {
-        sweepPosition = -bandWidth;
-      }
-      
-      animationRef.current = requestAnimationFrame(animate);
+      ctx.globalAlpha = 1;
+      if (progress < 1 && isAnimating) animationRef.current = requestAnimationFrame(draw);
     };
-    
-    animate();
-
+    animationRef.current = requestAnimationFrame(draw);
     return () => {
-      window.removeEventListener('resize', resizeCanvas);
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
+      window.removeEventListener('resize', resize);
+      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     };
-  }, [isSupported]);
+  }, [isAnimating, duration, color]);
 
-  const containerClass = 'ascii-sweep-container' + (!isSupported && enabled ? ' ascii-sweep-fallback' : '');
+  useEffect(() => () => {
+    if (animationRef.current) cancelAnimationFrame(animationRef.current);
+    window.clearTimeout(timerRef.current);
+  }, []);
 
+  const content = panels.length ? panels[displayIndex] : children;
   return (
-    <div 
-      ref={containerRef}
-      className={containerClass}
-      style={style}
-      {...props}
-    >
-      {isSupported && (
-        <canvas
-          ref={canvasRef}
-          className="ascii-sweep-canvas"
-        />
-      )}
-      <div className="ascii-sweep-content">
-        {children}
-      </div>
+    <div ref={rootRef} className={`ascii-sweep ${isAnimating ? 'is-sweeping' : ''} ${className}`} style={{ '--ascii-color': color }}>
+      <div className="ascii-sweep__content">{content}</div>
+      <canvas ref={canvasRef} className="ascii-sweep__canvas" aria-hidden="true" />
     </div>
   );
 }
 
 export default AsciiSweep;
+
+\n
