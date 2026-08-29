@@ -1,218 +1,337 @@
-import React, { useEffect, useRef, useState } from 'react';
-import './App.css';
-import mortisImage from './assets/images/mortis.png';
-import referenceAudio from './assets/audio/reference-segment.wav';
-import yunoVoiceAudio from './assets/audio/yuno1-voice.wav';
+import { useCallback, useEffect, useRef, useState } from 'react'
+import './App.css'
+import mortisImage from './assets/images/mortis.png'
+import referenceAudio from './assets/audio/reference-segment.wav'
+import yunoVoiceAudio from './assets/audio/yuno1-voice.wav'
 
-const repo = 'https://github.com/TKGEKKOU/yumeno';
-const releases = `${repo}/releases`;
+const REPO_URL = 'https://github.com/TKGEKKOU/yumeno'
+const RELEASES_URL = `${REPO_URL}/releases`
+const SECTION_IDS = ['home', 'operator', 'voice', 'agents', 'docs']
+const SECTION_LABELS = ['首页', '角色', '声音', '角色化 Agent', '文档']
 
-const pillars = [
-  {
-    index: '01',
-    eyebrow: 'PERSONA',
-    title: '角色',
-    summary: '先从一个人开始。',
-    body: '设定性格、语气、习惯和边界，让每个角色都有自己的相处方式。',
-    detail: '独立的人设 · 独立的会话 · 独立的空间',
-  },
-  {
-    index: '02',
-    eyebrow: 'MEMORY',
-    title: '记忆',
-    summary: '重要的事，不必再说一遍。',
-    body: '对话中的偏好、约定与片段可以留在本地，下一次相遇自然接得上。',
-    detail: '本地保存 · 可查看 · 可管理',
-  },
-  {
-    index: '03',
-    eyebrow: 'KNOWLEDGE',
-    title: '知识',
-    summary: '让回答有来处。',
-    body: '把资料放进角色自己的知识空间，在需要时检索，并在没有依据时明确说不知道。',
-    detail: '文档 · 表格 · 网页 · 独立隔离',
-  },
-];
+const agents = [
+  { id: 'knowledge', tone: 'violet', name: 'KNOWLEDGE SUBGRAPH', label: '知识执行图', detail: 'Planner / RAG / SQL / fallback', kind: 'subgraph' },
+  { id: 'memory', tone: 'cyan', name: 'MEMORY WORKER', label: '记忆整理', detail: '保存重要片段' },
+  { id: 'document', tone: 'cyan', name: 'DOCUMENT WORKER', label: '资料处理', detail: '导入与结构化' },
+  { id: 'profile', tone: 'cyan', name: 'PROFILE WORKER', label: '角色档案', detail: '人设与边界' },
+  { id: 'voice', tone: 'violet', name: 'VOICE CLONE WORKER', label: '声音工坊', detail: '参考音频与音色' },
+  { id: 'config', tone: 'pink', name: 'CONFIG WORKER', label: '运行配置', detail: 'Provider 与服务' },
+]
 
-const architecture = [
-  { key: 'character', label: '角色', sub: '表达与相处' },
-  { key: 'memory', label: '记忆', sub: '保留重要片段' },
-  { key: 'knowledge', label: '知识', sub: '查找可靠资料' },
-  { key: 'voice', label: '声音', sub: '听见角色回应' },
-  { key: 'action', label: '行动', sub: '需要时交给工具' },
-];
-
-const docs = [
-  {
-    id: 'about',
-    label: 'YUMENO 是什么',
-    title: '让角色成为一种长期关系',
-    paragraphs: [
-      'YUMENO 是一个本地优先的角色 AI 工作台。它不是把所有功能塞进一个聊天窗口，而是让角色拥有自己的设定、资料、记忆、声音与会话。',
-      '你可以从一个角色开始，慢慢补充它的世界，也可以只把它当作一个安静、可靠的桌面工具。',
-    ],
-  },
-  {
-    id: 'voice',
-    label: '声音工坊',
-    title: '从一段素材，到角色的声音',
-    paragraphs: [
-      '声音工坊支持从视频或音频素材中提取人声，进行分离、切片、挑选参考片段，再保存为可试听、可绑定的角色声音。',
-      '本地运行时可接入 GPT-SoVITS 等语音模型。素材和生成结果默认留在自己的设备上。',
-    ],
-  },
-  {
-    id: 'runtime',
-    label: '运行方式',
-    title: '在自己的 Windows 电脑里',
-    paragraphs: [
-      'YUMENO 面向 Windows 桌面使用，不需要注册和登录。角色、会话、记忆等应用数据保存在本地。',
-      '模型服务可以按需要连接 OpenAI-compatible 接口，也可以配置本地语音、向量和推理服务。',
-    ],
-  },
-  {
-    id: 'privacy',
-    label: '关于数据',
-    title: '你的角色，留在你的空间里',
-    paragraphs: [
-      '角色资料、会话和记忆使用本地存储；每个角色拥有独立的知识空间，避免不同角色之间互相串用资料。',
-      '涉及写入、修改或训练的操作，可以在执行前等待你的确认。',
-    ],
-  },
-];
-
-function AudioSample({ label, title, note, src, accent }) {
-  const audioRef = useRef(null);
-  const [playing, setPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return undefined;
-    const onTime = () => setProgress(audio.duration ? (audio.currentTime / audio.duration) * 100 : 0);
-    const onEnd = () => { setPlaying(false); setProgress(0); };
-    audio.addEventListener('timeupdate', onTime);
-    audio.addEventListener('ended', onEnd);
-    return () => { audio.removeEventListener('timeupdate', onTime); audio.removeEventListener('ended', onEnd); };
-  }, []);
-
-  const toggle = async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (playing) { audio.pause(); setPlaying(false); return; }
-    try { await audio.play(); setPlaying(true); } catch { setPlaying(false); }
-  };
-
-  const seek = (event) => {
-    const audio = audioRef.current;
-    if (!audio || !audio.duration) return;
-    audio.currentTime = (Number(event.target.value) / 100) * audio.duration;
-    setProgress(Number(event.target.value));
-  };
-
-  return (
-    <article className={`audio-card ${accent ? 'audio-card-accent' : ''}`}>
-      <audio ref={audioRef} src={src} preload="metadata" />
-      <div className="audio-card-top">
-        <span className="audio-number">{label}</span>
-        <span className="audio-format">WAV · 本地样本</span>
-      </div>
-      <div className="audio-card-main">
-        <button type="button" className="play-button" onClick={toggle} aria-label={`${playing ? '暂停' : '播放'}${title}`}>
-          <span className={playing ? 'pause-glyph' : 'play-glyph'} />
-        </button>
-        <div className="audio-copy"><h3>{title}</h3><p>{note}</p></div>
-      </div>
-      <div className="audio-progress-row">
-        <input type="range" min="0" max="100" value={progress} onChange={seek} aria-label={`${title}播放进度`} style={{ '--progress': `${progress}%` }} />
-        <span>{playing ? '试听中' : '试听'}</span>
-      </div>
-    </article>
-  );
+function getSectionFromHash() {
+  const value = window.location.hash.replace('#', '')
+  return SECTION_IDS.includes(value) ? value : 'home'
 }
 
-function DocDrawer({ doc, onClose }) {
-  if (!doc) return null;
+function formatTime(seconds) {
+  if (!Number.isFinite(seconds)) return '00:00'
+  const minutes = Math.floor(seconds / 60).toString().padStart(2, '0')
+  const remainder = Math.floor(seconds % 60).toString().padStart(2, '0')
+  return `${minutes}:${remainder}`
+}
+
+function AudioSample({ id, title, note, src, activeAudioId, setActiveAudioId }) {
+  const audioRef = useRef(null)
+  const [playing, setPlaying] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [duration, setDuration] = useState(0)
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return undefined
+    const onLoaded = () => setDuration(audio.duration || 0)
+    const onTime = () => setProgress(audio.duration ? (audio.currentTime / audio.duration) * 100 : 0)
+    const onEnd = () => {
+      setPlaying(false)
+      setProgress(0)
+      if (activeAudioId === id) setActiveAudioId(null)
+    }
+    audio.addEventListener('loadedmetadata', onLoaded)
+    audio.addEventListener('timeupdate', onTime)
+    audio.addEventListener('ended', onEnd)
+    return () => {
+      audio.removeEventListener('loadedmetadata', onLoaded)
+      audio.removeEventListener('timeupdate', onTime)
+      audio.removeEventListener('ended', onEnd)
+    }
+  }, [activeAudioId, id, setActiveAudioId])
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio || activeAudioId === id) return
+    audio.pause()
+    setPlaying(false)
+  }, [activeAudioId, id])
+
+  const toggle = async () => {
+    const audio = audioRef.current
+    if (!audio) return
+    if (playing) {
+      audio.pause()
+      setPlaying(false)
+      setActiveAudioId(null)
+      return
+    }
+    try {
+      setActiveAudioId(id)
+      await audio.play()
+      setPlaying(true)
+    } catch {
+      setPlaying(false)
+      setActiveAudioId(null)
+    }
+  }
+
+  const seek = (event) => {
+    const audio = audioRef.current
+    if (!audio || !duration) return
+    audio.currentTime = (Number(event.target.value) / 100) * duration
+    setProgress(Number(event.target.value))
+  }
+
   return (
-    <div className="drawer-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <aside className="doc-drawer" role="dialog" aria-modal="true" aria-labelledby="doc-title">
-        <div className="drawer-head"><span>YUMENO / 文档</span><button type="button" className="close-button" onClick={onClose} aria-label="关闭文档">×</button></div>
-        <div className="drawer-body"><p className="drawer-label">{doc.label}</p><h2 id="doc-title">{doc.title}</h2>{doc.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>
-        <div className="drawer-foot"><span>站内阅读</span><span>ESC 关闭</span></div>
-      </aside>
-    </div>
-  );
+    <article className={`audio-sample ${playing ? 'is-playing' : ''}`}>
+      <audio ref={audioRef} src={src} preload="metadata" />
+      <div className="audio-sample__topline">
+        <span className="audio-dot" aria-hidden="true" />
+        <span>本地样本</span>
+        <span className="audio-sample__time">{formatTime((progress / 100) * duration)} / {formatTime(duration)}</span>
+      </div>
+      <div className="audio-sample__body">
+        <button className="play-button" type="button" onClick={toggle} aria-label={`${playing ? '暂停' : '播放'}${title}`}>
+          <span>{playing ? 'Ⅱ' : '▶'}</span>
+        </button>
+        <div className="audio-sample__copy">
+          <h3>{title}</h3>
+          <p>{note}</p>
+        </div>
+      </div>
+      <div className="audio-progress">
+        <input type="range" min="0" max="100" step="0.1" value={progress} onChange={seek} aria-label={`${title}播放进度`} />
+        <span style={{ width: `${progress}%` }} />
+      </div>
+    </article>
+  )
+}
+
+function AgentNode({ agent, index, active, onFocus }) {
+  return (
+    <button className={`agent-node agent-node--${agent.id} ${active ? 'is-active' : ''}`} data-tone={agent.tone} type="button" onClick={() => onFocus(agent.id)}>
+      <span className="agent-node__index">0{index + 1}</span>
+      <span className="agent-node__name">{agent.name}</span>
+      <strong>{agent.label}</strong>
+      <small>{agent.detail}</small>
+    </button>
+  )
 }
 
 function App() {
-  const [activeDoc, setActiveDoc] = useState(null);
+  const [activeSection, setActiveSection] = useState(getSectionFromHash)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const [activeAudioId, setActiveAudioId] = useState(null)
+  const [characterState, setCharacterState] = useState('idle')
+  const [focusedAgent, setFocusedAgent] = useState('knowledge')
+  const wheelAccumulator = useRef(0)
+  const transitionTimer = useRef(null)
+  const touchStart = useRef(null)
+
+  const activeIndex = Math.max(0, SECTION_IDS.indexOf(activeSection))
+
+  const goToIndex = useCallback((nextIndex, replace = false) => {
+    const clamped = Math.min(SECTION_IDS.length - 1, Math.max(0, nextIndex))
+    const nextId = SECTION_IDS[clamped]
+    if (nextId === activeSection || isTransitioning) return
+    setIsTransitioning(true)
+    setActiveSection(nextId)
+    const method = replace ? 'replaceState' : 'pushState'
+    window.history[method]({}, '', `#${nextId}`)
+    window.clearTimeout(transitionTimer.current)
+    transitionTimer.current = window.setTimeout(() => setIsTransitioning(false), 720)
+  }, [activeSection, isTransitioning])
+
+  const goToSection = useCallback((id, replace = false) => {
+    const index = SECTION_IDS.indexOf(id)
+    if (index >= 0) goToIndex(index, replace)
+  }, [goToIndex])
 
   useEffect(() => {
-    const onKey = (event) => { if (event.key === 'Escape') setActiveDoc(null); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
+    const initial = getSectionFromHash()
+    if (window.location.hash !== `#${initial}`) window.history.replaceState({}, '', `#${initial}`)
+    const onHashChange = () => {
+      const next = getSectionFromHash()
+      setActiveSection(next)
+      setIsTransitioning(false)
+    }
+    window.addEventListener('hashchange', onHashChange)
+    window.addEventListener('popstate', onHashChange)
+    return () => {
+      window.removeEventListener('hashchange', onHashChange)
+      window.removeEventListener('popstate', onHashChange)
+      window.clearTimeout(transitionTimer.current)
+    }
+  }, [])
 
-  const openDoc = (id) => setActiveDoc(docs.find((doc) => doc.id === id) ?? docs[0]);
+  useEffect(() => {
+    const onWheel = (event) => {
+      if (Math.abs(event.deltaY) < 2) return
+      event.preventDefault()
+      if (isTransitioning) return
+      wheelAccumulator.current += event.deltaY
+      if (Math.abs(wheelAccumulator.current) >= 55) {
+        const direction = wheelAccumulator.current > 0 ? 1 : -1
+        wheelAccumulator.current = 0
+        goToIndex(activeIndex + direction)
+      }
+    }
+    const onKeyDown = (event) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return
+      if (['ArrowDown', 'PageDown', ' '].includes(event.key)) {
+        event.preventDefault()
+        goToIndex(activeIndex + 1)
+      }
+      if (['ArrowUp', 'PageUp'].includes(event.key)) {
+        event.preventDefault()
+        goToIndex(activeIndex - 1)
+      }
+      if (event.key === 'Home') {
+        event.preventDefault()
+        goToIndex(0)
+      }
+      if (event.key === 'End') {
+        event.preventDefault()
+        goToIndex(SECTION_IDS.length - 1)
+      }
+    }
+    const onTouchStart = (event) => { touchStart.current = event.changedTouches[0].clientY }
+    const onTouchEnd = (event) => {
+      if (touchStart.current === null || isTransitioning) return
+      const delta = touchStart.current - event.changedTouches[0].clientY
+      touchStart.current = null
+      if (Math.abs(delta) >= 45) goToIndex(activeIndex + (delta > 0 ? 1 : -1))
+    }
+    window.addEventListener('wheel', onWheel, { passive: false })
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchend', onTouchEnd, { passive: true })
+    return () => {
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [activeIndex, goToIndex, isTransitioning])
+
+  const currentAgent = agents.find((agent) => agent.id === focusedAgent) || agents[0]
 
   return (
-    <div className="site-shell">
-      <header className="site-header">
-        <a className="brand" href="#top" aria-label="YUMENO 首页"><span className="brand-mark">Y</span><span className="brand-name">YUMENO</span></a>
-        <nav className="site-nav" aria-label="主导航">
-          <a href="#world">角色</a><a href="#voice">声音</a><a href="#structure">结构</a><button type="button" onClick={() => openDoc('about')}>文档</button>
-        </nav>
-        <div className="header-actions"><a className="github-link" href={repo} target="_blank" rel="noreferrer">GitHub <span>↗</span></a><a className="header-download" href={releases} target="_blank" rel="noreferrer">下载</a></div>
+    <main className="app-shell">
+      <div className="noise" aria-hidden="true" />
+      <div className="grid-glow" aria-hidden="true" />
+
+      <header className="topbar">
+        <button className="brand" type="button" onClick={() => goToSection('home')} aria-label="返回 YUMENO 首页">
+          <span className="brand__mark">Y</span>
+          <span>YUMENO</span>
+        </button>
+        <p className="topbar__context">LOCAL CHARACTER WORKSPACE</p>
+        <a className="topbar__github" href={REPO_URL} target="_blank" rel="noreferrer">GitHub ↗</a>
       </header>
 
-      <main id="top">
-        <section className="hero-section">
-          <div className="hero-copy">
-            <p className="kicker"><span className="kicker-line" />一个属于你的角色空间</p>
-            <h1>让一个角色，<br /><em>慢慢成为</em><br />你熟悉的存在。</h1>
-            <p className="hero-lede">YUMENO 把角色、声音、记忆和资料放在一起。<br />在自己的电脑里，建立一段可以持续的相处。</p>
-            <div className="hero-actions"><a className="primary-button" href={releases} target="_blank" rel="noreferrer">下载 YUMENO <span>↓</span></a><a className="text-link" href="#world">看看它能做什么 <span>↘</span></a></div>
-            <div className="hero-meta"><span>WINDOWS 优先</span><span>无需注册</span><span>本地保存</span></div>
-          </div>
-          <div className="hero-art" aria-label="YUMENO 角色视觉">
-            <div className="art-caption"><span>01 / 角色</span><span>建立自己的相处方式</span></div>
-            <div className="art-frame"><img src={mortisImage} alt="YUMENO 角色 Mortis" /><div className="art-wash" /><span className="art-corner art-corner-tl" /><span className="art-corner art-corner-br" /></div>
-            <div className="art-side-note">YUMENO<br /><span>PERSONA WORKSPACE</span></div>
-          </div>
-        </section>
+      <nav className="section-nav" aria-label="章节导航">
+        <div className="section-nav__line" aria-hidden="true" />
+        {SECTION_IDS.map((id, index) => (
+          <button key={id} type="button" className={activeSection === id ? 'is-active' : ''} onClick={() => goToSection(id)} aria-current={activeSection === id ? 'page' : undefined}>
+            <span className="section-nav__dot" />
+            <span>{SECTION_LABELS[index]}</span>
+          </button>
+        ))}
+      </nav>
 
-        <section className="manifesto-section" id="world">
-          <div className="section-rule"><span>01</span><span>从一个角色开始</span><span>YUMENO / 2026</span></div>
-          <div className="manifesto-grid"><p className="section-label">角色<br />不是头像</p><div><h2>它有自己的<br /><span>世界。</span></h2><p className="manifesto-copy">每个角色都可以拥有独立的人设、记忆、知识和声音。你不需要一次准备好一切，先从一句话开始就够了。</p></div><div className="manifesto-aside"><span className="aside-mark">◒</span><p>把设定放进去，<br />把时间留出来。</p></div></div>
-          <div className="pillar-grid">{pillars.map((pillar) => <article className="pillar-card" key={pillar.index}><div className="pillar-top"><span>{pillar.index}</span><span>{pillar.eyebrow}</span></div><div><h3>{pillar.title}</h3><p className="pillar-summary">{pillar.summary}</p><p className="pillar-body">{pillar.body}</p></div><p className="pillar-detail">{pillar.detail}</p></article>)}</div>
-        </section>
+      <div className="stage-viewport">
+        <div className="stage-track" style={{ transform: `translate3d(0, -${activeIndex * 100}svh, 0)` }}>
+          <section className="stage-section stage-section--home" id="home" aria-label="首页">
+            <div className="home-layout">
+              <div className="home-copy">
+                <p className="kicker">YUMENO / CHARACTER AI WORKSPACE</p>
+                <h1>让角色拥有<br /><span>自己的世界。</span></h1>
+                <p className="home-lede">一个本地优先的角色工作台。记忆、知识、声音与行动，由一组角色化 Agent 协作完成。</p>
+                <button className="line-button line-button--bright" type="button" onClick={() => goToSection('operator')}>进入角色 <span>↓</span></button>
+              </div>
+              <div className="home-mark" aria-hidden="true"><span>Y</span><i /><i /><i /></div>
+            </div>
+            <div className="stage-hint"><span>滚动 / 滑动</span><span className="stage-hint__arrow">↓</span></div>
+          </section>
 
-        <section className="voice-section" id="voice">
-          <div className="section-rule dark-rule"><span>02</span><span>声音工坊</span><span>从素材，到回应</span></div>
-          <div className="voice-intro"><div><p className="section-label light-label">听见<br />它的声音</p><h2>一段声音，<br /><em>靠近</em>一个角色。</h2></div><p className="voice-lede">从音频或视频素材中选出合适的片段，整理、试听，再把它放进角色里。这里展示的是 YUMENO 项目中的真实样本。</p></div>
-          <div className="audio-stage"><div className="audio-stage-head"><span>VOICE STUDIO / SAMPLE</span><span>真实素材试听</span></div><div className="audio-grid"><AudioSample label="SOURCE 01" title="参考人声片段" note="从素材中提取的清晰人声" src={referenceAudio} /><AudioSample label="VOICE 02" title="YUNO1 角色声音" note="保存后的参考音色，可绑定角色" src={yunoVoiceAudio} accent /></div><div className="voice-pipeline"><span>上传素材</span><i>→</i><span>提取人声</span><i>→</i><span>试听保存</span><i>→</i><strong>绑定角色</strong></div></div>
-        </section>
+          <section className="stage-section stage-section--operator" id="operator" aria-label="角色">
+            <div className="section-heading">
+              <p className="kicker">角色展台</p>
+              <h2>先有一个角色，<br /><span>再让它慢慢长出关系。</span></h2>
+              <p>角色不是一张头像。它有自己的设定、会话、记忆、知识与声音。</p>
+              <div className="operator-flow"><span>角色对话</span><b>→</b><strong>Supervisor</strong><b>→</b><span>多个 Agent</span></div>
+            </div>
+            <div className={`character-stage character-stage--${characterState}`}>
+              <div className="character-stage__halo" aria-hidden="true" />
+              <img src={mortisImage} alt="Mortis 角色展示图" />
+              <div className="character-stage__caption"><span>MORTIS</span><small>角色视觉样本</small></div>
+            </div>
+            <div className="character-controls" aria-label="角色状态切换">
+              <span className="character-controls__label">状态</span>
+              {[["idle", '待机'], ['thinking', '思考'], ['replying', '回应']].map(([id, label]) => <button key={id} type="button" className={characterState === id ? 'is-active' : ''} onClick={() => setCharacterState(id)}>{label}</button>)}
+              <span className="character-controls__status">{characterState === 'idle' ? '保持安静' : characterState === 'thinking' ? '正在选择路径' : '准备表达'}</span>
+            </div>
+          </section>
 
-        <section className="structure-section" id="structure">
-          <div className="section-rule"><span>03</span><span>里面如何工作</span><span>不必先懂技术</span></div>
-          <div className="structure-intro"><p className="section-label">简单的<br />关系</p><div><h2>让不同的能力，<br /><span>各自做好一件事。</span></h2><p>角色负责表达，知识负责查找，记忆负责保留，声音负责回应。需要行动时，再把事情交给合适的工具。</p></div></div>
-          <div className="architecture-board"><div className="board-top"><span>YUMENO / PERSONA WORKSPACE</span><span>LOCAL FIRST</span></div><div className="arch-diagram"><div className="arch-center"><span className="center-orbit orbit-one" /><span className="center-orbit orbit-two" /><strong>角色</strong><small>PERSONA</small><span className="center-dot" /></div><div className="arch-lines" aria-hidden="true"><i className="line line-a" /><i className="line line-b" /><i className="line line-c" /><i className="line line-d" /><i className="line line-e" /></div>{architecture.filter((item) => item.key !== 'character').map((item) => <div className={`arch-node node-${item.key}`} key={item.key}><span className="node-index">0{architecture.indexOf(item) + 1}</span><strong>{item.label}</strong><small>{item.sub}</small></div>)}</div><div className="board-foot"><span>每个角色拥有独立的会话与知识空间</span><span>可连接本地或兼容服务</span></div></div>
-        </section>
+          <section className="stage-section stage-section--voice" id="voice" aria-label="声音">
+            <div className="section-heading section-heading--wide">
+              <p className="kicker">声音工坊</p>
+              <h2>让角色不只被看见，<br /><span>也能被听见。</span></h2>
+              <p>从一段素材开始，经过处理、试听和保存，成为可以绑定到角色的声音。</p>
+            </div>
+            <div className="audio-layout">
+              <div className="audio-samples">
+                <AudioSample id="reference" title="参考人声片段" note="从素材中提取的清晰人声" src={referenceAudio} activeAudioId={activeAudioId} setActiveAudioId={setActiveAudioId} />
+                <AudioSample id="yuno" title="YUNO1 角色声音" note="保存后的参考音色，可绑定角色" src={yunoVoiceAudio} activeAudioId={activeAudioId} setActiveAudioId={setActiveAudioId} />
+              </div>
+              <div className="voice-pipeline" aria-label="声音工坊流程">
+                {['素材', '分离', '切片', '拼接', '试听', '绑定'].map((step, index) => <div key={step} className="voice-pipeline__step"><span>{String(index + 1).padStart(2, '0')}</span><strong>{step}</strong>{index < 5 && <i>→</i>}</div>)}
+              </div>
+            </div>
+          </section>
 
-        <section className="docs-section" id="docs">
-          <div className="section-rule"><span>04</span><span>继续了解</span><span>站内文档</span></div>
-          <div className="docs-layout"><div><p className="section-label">把问题<br />留在这里</p><h2>不必离开<br /><span>当前页面。</span></h2></div><div className="docs-list">{docs.map((doc, index) => <button type="button" className="doc-row" key={doc.id} onClick={() => setActiveDoc(doc)}><span>0{index + 1}</span><strong>{doc.label}</strong><span className="doc-arrow">↗</span></button>)}</div></div>
-        </section>
+          <section className="stage-section stage-section--agents" id="agents" aria-label="角色化 Agent">
+            <div className="agents-intro">
+              <div>
+                <p className="kicker">角色化 Agent</p>
+                <h2>一个角色的背后，<br /><span>是一组分工明确的协作者。</span></h2>
+              </div>
+              <p className="agents-intro__copy">YUMENO 不让所有 Agent 无限制地自由聊天。Supervisor 负责理解意图、选择路径、收拢结果，再用角色的方式回应你。这里是 5 个受限 Worker，加上一条确定性的知识执行图。</p>
+            </div>
+            <div className="agent-system">
+              <svg className="agent-lines" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden="true">
+                <defs><linearGradient id="flow-cyan" x1="0" x2="1"><stop offset="0" stopColor="#70e7ff" stopOpacity=".15" /><stop offset=".5" stopColor="#70e7ff" /><stop offset="1" stopColor="#70e7ff" stopOpacity=".15" /></linearGradient></defs>
+                <path d="M500 276 C390 190 245 90 112 74" /><path d="M500 276 C390 240 240 204 86 202" /><path d="M500 276 C380 300 230 324 92 346" /><path d="M500 276 C615 190 760 90 888 74" /><path d="M500 276 C615 240 770 204 914 202" /><path d="M500 276 C620 310 770 340 900 378" />
+              </svg>
+              <div className="agent-supervisor"><span className="agent-supervisor__pulse" /><p>中心协调</p><strong>PERSONA<br />SUPERVISOR</strong><small>理解意图 · 选择路径 · 统一表达</small></div>
+              <div className="agent-nodes">
+                {agents.map((agent, index) => <AgentNode key={agent.id} agent={agent} index={index} active={focusedAgent === agent.id} onFocus={setFocusedAgent} />)}
+              </div>
+              <div className="agent-contract"><span>领域结果</span><b>finalize_*</b><span>回到 Supervisor</span></div>
+              <div className="agent-checkpoint"><span className="checkpoint-dot" />HITL / CHECKPOINT <small>敏感写入 · 修改 · 训练，可在执行前确认</small></div>
+            </div>
+            <div className="agent-detail"><span>{currentAgent.name}</span><strong>{currentAgent.label}</strong><p>{currentAgent.detail}。{currentAgent.kind === 'subgraph' ? '它负责规划与执行知识路径，返回证据和不确定性。' : '它只处理自己的领域，把结构化结果交还给中心协调。'}</p></div>
+          </section>
 
-        <section className="download-section">
-          <div className="download-panel"><div><p className="section-label light-label">现在开始</p><h2>把它带回<br /><em>自己的电脑。</em></h2></div><div className="download-side"><p>YUMENO 面向 Windows 桌面运行。下载后，从一个角色开始。</p><div className="download-actions"><a className="light-button" href={releases} target="_blank" rel="noreferrer">前往下载 <span>↓</span></a><button type="button" className="light-text-button" onClick={() => openDoc('runtime')}>查看运行方式 <span>↗</span></button></div></div><div className="download-index">YUMENO<br /><span>YOUR SPACE, YOUR STORY</span></div></div>
-        </section>
-      </main>
-
-      <footer className="site-footer"><a className="brand footer-brand" href="#top"><span className="brand-mark">Y</span><span className="brand-name">YUMENO</span></a><p>角色、声音、记忆与知识，留在你的空间里。</p><div className="footer-links"><a href={repo} target="_blank" rel="noreferrer">源码 ↗</a><a href={releases} target="_blank" rel="noreferrer">发布 ↗</a><button type="button" onClick={() => openDoc('privacy')}>数据说明 ↗</button></div></footer>
-      <DocDrawer doc={activeDoc} onClose={() => setActiveDoc(null)} />
-    </div>
-  );
+          <section className="stage-section stage-section--docs" id="docs" aria-label="文档">
+            <div className="docs-stage">
+              <div className="section-heading"><p className="kicker">站内文档</p><h2>想了解更多，<br /><span>留在这里继续看。</span></h2><p>从第一次启动，到多 Agent 架构、声音工坊和部署要求，详细资料都整理在站内文档中。</p><a className="line-button line-button--bright" href="./docs.html#quick-start">打开文档 <span>↗</span></a></div>
+              <div className="docs-index"><a href="./docs.html#architecture"><span>01</span><strong>多 Agent 架构</strong><i>↗</i></a><a href="./docs.html#voice-studio"><span>02</span><strong>声音工坊</strong><i>↗</i></a><a href="./docs.html#deployment"><span>03</span><strong>使用与部署</strong><i>↗</i></a><a href="./docs.html#faq"><span>04</span><strong>常见问题</strong><i>↗</i></a></div>
+            </div>
+            <footer className="stage-footer"><span>YUMENO / LOCAL FIRST</span><span>角色、记忆、知识与声音，留在自己的空间里。</span><div><a href={REPO_URL} target="_blank" rel="noreferrer">源码 ↗</a><a href={RELEASES_URL} target="_blank" rel="noreferrer">发布 ↗</a></div></footer>
+          </section>
+        </div>
+      </div>
+    </main>
+  )
 }
 
-export default App;
+export default App
