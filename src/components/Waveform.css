@@ -10,5 +10,3 @@
 @keyframes wave-breathe { from { transform: scaleY(.55); } to { transform: scaleY(1.05); } }
 @media (max-width: 680px) { .waveform { right: 22px; bottom: 24px; left: 22px; } }
 @media (prefers-reduced-motion: reduce) { .waveform.is-playing .waveform-bars i { animation: none; } .waveform-bars i, .waveform-track span, .waveform-button { transition-duration: .01ms; } }
-
-\n

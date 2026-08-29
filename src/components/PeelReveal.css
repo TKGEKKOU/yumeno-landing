@@ -48,5 +48,3 @@
   .peel-reveal__hint { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .peel-reveal__sheet, .peel-reveal__toggle, .peel-nav button { transition-duration: .01ms; } }
-
-\n

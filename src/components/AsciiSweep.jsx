@@ -100,5 +100,3 @@ function AsciiSweep({ panels = [], index = 0, children, color = '#5657D9', durat
 }
 
 export default AsciiSweep;
-
-\n

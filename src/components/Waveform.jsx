@@ -21,5 +21,3 @@ function Waveform({ bars = 42, isPlaying = false, progress = 0, onToggle, classN
 }
 
 export default Waveform;
-
-\n

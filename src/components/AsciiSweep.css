@@ -6,5 +6,3 @@
 @keyframes ascii-glow { to { transform: translateX(110%); } }
 @keyframes ascii-flash { 0%, 100% { opacity: 0; } 25%, 65% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .ascii-sweep.is-sweeping .ascii-sweep__canvas, .ascii-sweep.is-sweeping::after { animation: none; opacity: 0; } }
-
-\n

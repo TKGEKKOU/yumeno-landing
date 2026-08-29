@@ -79,5 +79,3 @@ function PeelReveal({ children, reveal, className = '' }) {
 }
 
 export default PeelReveal;
-
-\n
