@@ -88,6 +88,13 @@ nav a:hover {
   line-height: 1.7;
 }
 
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
 .hero-left .cta {
   display: inline-flex;
   align-items: center;
@@ -101,6 +108,113 @@ nav a:hover {
   font-weight: 600;
   transition: all 0.25s;
   box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
+}
+
+.secondary-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: clamp(14px, 1.8vw, 16px) clamp(24px, 3vw, 28px);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: clamp(15px, 1.6vw, 16px);
+  font-weight: 600;
+  transition: all 0.25s;
+}
+
+.secondary-cta:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+/* Capability matrix */
+.capability-section {
+  padding: clamp(80px, 12vw, 120px) 0;
+  background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-0) 100%);
+}
+
+.capability-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(18px, 2vw, 24px);
+}
+
+.capability-card {
+  min-height: 220px;
+  padding: clamp(24px, 3vw, 30px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-0);
+  transition: all 0.3s;
+}
+
+.capability-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 12px 32px rgba(0, 102, 204, 0.1);
+  transform: translateY(-3px);
+}
+
+.capability-card h3 {
+  margin-bottom: 12px;
+  font-size: clamp(17px, 2vw, 19px);
+  font-weight: 650;
+}
+
+.capability-card p {
+  color: var(--text-secondary);
+  font-size: clamp(13px, 1.35vw, 14px);
+  line-height: 1.65;
+}
+
+/* Quickstart */
+.quickstart-section {
+  padding: clamp(80px, 12vw, 120px) 0;
+}
+
+.quickstart-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(18px, 2vw, 24px);
+}
+
+.step-card {
+  min-height: 220px;
+  padding: clamp(24px, 3vw, 30px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-1);
+}
+
+.step-card span {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.step-card h3 {
+  margin-bottom: 10px;
+  font-size: clamp(17px, 2vw, 19px);
+}
+
+.step-card p {
+  color: var(--text-secondary);
+  font-size: clamp(13px, 1.35vw, 14px);
+  line-height: 1.65;
+}
+
+.step-card code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  font-size: 0.9em;
 }
 
 .hero-left .cta:hover {
@@ -489,6 +603,11 @@ footer {
   }
 
   .deploy-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .capability-grid,
+  .quickstart-steps {
     grid-template-columns: 1fr;
   }
 
